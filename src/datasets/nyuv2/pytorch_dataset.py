@@ -9,6 +9,7 @@ import numpy as np
 
 from ..dataset_base import DatasetBase
 from .nyuv2 import NYUv2Base
+import h5py
 
 
 class NYUv2(NYUv2Base, DatasetBase):
