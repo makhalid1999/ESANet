@@ -29,8 +29,8 @@ class NYUv2(NYUv2Base, DatasetBase):
         self._with_input_orig = with_input_orig
         self._cameras = ['kv1']
 
-        self._filenames = self.get_files_by_extension(self.path)
         self.path = '/kaggle/input/'
+        self._filenames = self.get_files_by_extension(self.path)
 
         # load class names
         self._class_names = getattr(self, f'CLASS_NAMES_{self._n_classes}')
