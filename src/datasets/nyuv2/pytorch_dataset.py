@@ -30,8 +30,6 @@ class NYUv2(NYUv2Base, DatasetBase):
         self._cameras = ['kv1']
 
         self._filenames = self.get_files_by_extension(self.path)
-        else:
-            print(f"Loaded {self.__class__.__name__} dataset without files")
 
         # load class names
         self._class_names = getattr(self, f'CLASS_NAMES_{self._n_classes}')
