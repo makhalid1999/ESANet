@@ -52,7 +52,7 @@ class NYUv2(NYUv2Base, DatasetBase):
         file_list = []
         subpaths = os.listdir(self.path + 'hypersimrgb/downloads')
         subpaths.sort()
-        if self.trainval == 'train':
+        if self._split == 'train':
             subpaths = subpaths[100:350]
         else:
             subpaths = subpaths[400:]
