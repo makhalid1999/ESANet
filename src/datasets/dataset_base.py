@@ -189,7 +189,7 @@ class DatasetBase(abc.ABC, Dataset):
             class_weighting = n_pixels_per_class
 
         elif weight_mode == 'median_frequency':
-            frequency = n_pixels_per_class / n_image_pixels_with_class
+            frequency = n_pixels_per_class / (n_image_pixels_with_class + 10e-5)
             class_weighting = np.median(frequency) / frequency
 
         elif weight_mode == 'logarithmic':
