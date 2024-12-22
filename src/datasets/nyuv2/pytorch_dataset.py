@@ -29,15 +29,7 @@ class NYUv2(NYUv2Base, DatasetBase):
         self._with_input_orig = with_input_orig
         self._cameras = ['kv1']
 
-        if data_dir is not None:
-            data_dir = os.path.expanduser(data_dir)
-            assert os.path.exists(data_dir)
-            self._data_dir = data_dir
-
-            # load filenames
-            fp = os.path.join(self._data_dir,
-                              self.SPLIT_FILELIST_FILENAMES[self._split])
-            self._filenames = np.loadtxt(fp, dtype=str)
+        self._filenames = self.get_files_by_extension(self.path)
         else:
             print(f"Loaded {self.__class__.__name__} dataset without files")
 
@@ -56,6 +48,25 @@ class NYUv2(NYUv2Base, DatasetBase):
         # stats for raw: mean: 2769.0187903686697, std: 1350.4174149841133
         self._depth_mean = 2841.94941272766
         self._depth_std = 1417.2594281672277
+
+    def get_files_by_extension(self, path):
+        file_list = []
+        subpaths = os.listdir(self.path + 'hypersimrgb/downloads')
+        subpaths.sort()
+        if self.trainval == 'train':
+            subpaths = subpaths[100:350]
+        else:
+            subpaths = subpaths[400:]
+        for folder in subpaths:
+            folders = os.listdir(self.path + 'hypersimrgb/downloads/' + folder + '/images/')
+            for f in folders:
+                files = os.listdir(self.path + 'hypersimrgb/downloads/' + folder + '/images/' + f)
+                for fi in files:
+                    rgb_path = self.path + 'hypersimrgb/downloads/' + folder + '/images/' + f + '/' + fi
+                    depth_path = self.path + 'hyperdepth/downloads/' + folder + '/images/' + f[:len(f)-13] + 'geometry_preview/' + fi[:len(fi)-9]+'depth_meters.png'
+                    labels_path = self.path + 'hyperlabels/downloads/' + folder + '/images/' + f[:len(f)-13] + 'geometry_hdf5/' + fi[:len(fi)-9]+'semantic.hdf5'
+                    file_list.append([rgb_path, depth_path, labels_path])
+        return file_list
 
     @property
     def cameras(self):
@@ -110,10 +121,6 @@ class NYUv2(NYUv2Base, DatasetBase):
         return self._with_input_orig
 
     def _load(self, directory, filename):
-        fp = os.path.join(self._data_dir,
-                          self.split,
-                          directory,
-                          f'{filename}.png')
         im = cv2.imread(fp, cv2.IMREAD_UNCHANGED)
         if im.ndim == 3:
             im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
@@ -121,17 +128,17 @@ class NYUv2(NYUv2Base, DatasetBase):
         return im
 
     def load_image(self, idx):
-        return self._load(self.RGB_DIR, self._filenames[idx])
+        return self._load(self._filenames[idx][0])
 
     def load_depth(self, idx):
         if self._depth_mode == 'raw':
-            return self._load(self.DEPTH_RAW_DIR, self._filenames[idx])
+            return self._load(self._filenames[idx][1])
         else:
-            return self._load(self.DEPTH_DIR, self._filenames[idx])
+            return self._load(self._filenames[idx][1])
 
     def load_label(self, idx):
-        return self._load(self.LABELS_DIR_FMT.format(self._n_classes),
-                          self._filenames[idx])
+        x = h5py.File(self._filenames[idx][2])
+        return x['dataset'][:]
 
     def __len__(self):
         return len(self._filenames)
