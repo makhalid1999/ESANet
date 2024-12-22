@@ -138,7 +138,9 @@ class NYUv2(NYUv2Base, DatasetBase):
 
     def load_label(self, idx):
         x = h5py.File(self._filenames[idx][2])
-        return x['dataset'][:]
+        labels_gt = x['dataset'][:]
+        labels_gt[labels_gt == -1] = 40
+        return labels_gt
 
     def __len__(self):
         return len(self._filenames)
